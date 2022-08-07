@@ -5,8 +5,10 @@ namespace Furdarius\OIDConnect;
 use Closure;
 use Furdarius\OIDConnect\Contract\Authenticator;
 use Furdarius\OIDConnect\Exception\AuthenticationException;
+use Illuminate\Http\Request;
 use Lcobucci\Clock\Clock;
 use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\ValidAt;
 use Lcobucci\JWT\Validator;
@@ -16,31 +18,31 @@ class TokenMiddleware
     /**
      * @var RequestTokenParser
      */
-    private $parser;
+    private RequestTokenParser $parser;
     /**
      * @var Validator
      */
-    private $validator;
+    private Validator $validator;
     /**
      * @var Clock
      */
-    private $clock;
+    private Clock $clock;
     /**
      * @var Signer
      */
-    private $signer;
+    private Signer $signer;
     /**
      * @var KeysFetcher
      */
-    private $keysFetcher;
+    private KeysFetcher $keysFetcher;
     /**
      * @var TokenRefresher
      */
-    private $tokenRefresher;
+    private TokenRefresher $tokenRefresher;
     /**
      * @var Authenticator
      */
-    private $authenticator;
+    private Authenticator $authenticator;
 
     /**
      * TokenMiddleware constructor.
@@ -74,19 +76,19 @@ class TokenMiddleware
     /**
      * Validate an ID Token of incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Closure                 $next
+     * @param Request $request
+     * @param Closure $next
      *
      * @return mixed
-     * @throws \Furdarius\OIDConnect\Exception\AuthenticationException
+     * @throws AuthenticationException
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         /**
          * We cant get claims from Token interface, so call claims method implicitly
          * link: https://github.com/lcobucci/jwt/pull/186
          *
-         * @var $token \Lcobucci\JWT\Token\Plain
+         * @var $token Plain
          */
         $token = $this->parser->parse($request);
 

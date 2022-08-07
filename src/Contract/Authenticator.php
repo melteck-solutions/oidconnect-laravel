@@ -8,8 +8,6 @@ interface Authenticator
 {
     /**
      * @param DataSet $claims
-     *
-     * @return mixed
      */
     public function authUser(DataSet $claims);
 }

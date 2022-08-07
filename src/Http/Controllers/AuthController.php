@@ -9,7 +9,11 @@ use Furdarius\OIDConnect\TokenStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use JsonSerializable;
+use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User;
 use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\Token\Plain;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AuthController extends BaseController
@@ -18,21 +22,19 @@ class AuthController extends BaseController
      *
      * @return RedirectResponse
      */
-    public function redirect()
+    public function redirect(): RedirectResponse
     {
-        /** @var \Symfony\Component\HttpFoundation\RedirectResponse $redirectResponse */
-        $redirectResponse = \Socialite::with('myoidc')->stateless()->redirect();
-
-        return $redirectResponse;
+        /** @var RedirectResponse $redirectResponse */
+        return Socialite::with('myoidc')->stateless()->redirect();
     }
 
     /**
-     * @param Request                            $request
-     * @param \Furdarius\OIDConnect\TokenStorage $storage
+     * @param Request      $request
+     * @param TokenStorage $storage
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function callback(Request $request, TokenStorage $storage)
+    public function callback(Request $request, TokenStorage $storage): JsonResponse
     {
         // TODO: handle CORS more elegant way
         if ($request->getMethod() === 'OPTIONS') {
@@ -42,8 +44,8 @@ class AuthController extends BaseController
                 ->header('Access-Control-Allow-Headers', $request->headers->get('Access-Control-Request-Headers'));
         }
 
-        /** @var \Laravel\Socialite\Two\User $user */
-        $user = \Socialite::with('myoidc')->stateless()->user();
+        /** @var User $user */
+        $user = Socialite::with('myoidc')->stateless()->user();
 
         if (!$storage->saveRefresh($user['sub'], $user['iss'], $user->refreshToken)) {
             throw new TokenStorageException("Failed to save refresh token");
@@ -57,13 +59,13 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param array|\JsonSerializable $data
+     * @param array|JsonSerializable $data
      * @param int                     $status
      * @param array                   $headers
      *
      * @return JsonResponse
      */
-    protected function responseJson($data, int $status = 200, array $headers = []): JsonResponse
+    protected function responseJson(array|JsonSerializable $data, int $status = 200, array $headers = []): JsonResponse
     {
         return response()->json($data, $status, $headers)
             ->setEncodingOptions(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
@@ -77,7 +79,7 @@ class AuthController extends BaseController
      *
      * @return AuthenticationException|JsonResponse
      */
-    public function refresh(Request $request, TokenRefresher $refresher, Parser $parser)
+    public function refresh(Request $request, TokenRefresher $refresher, Parser $parser): JsonResponse|AuthenticationException
     {
         $data = $request->json()->all();
 
@@ -90,7 +92,7 @@ class AuthController extends BaseController
          * We cant get claims from Token interface, so call claims method implicitly
          * link: https://github.com/lcobucci/jwt/pull/186
          *
-         * @var $token \Lcobucci\JWT\Token\Plain
+         * @var $token Plain
          */
         $token = $parser->parse($jwt);
 

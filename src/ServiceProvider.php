@@ -8,6 +8,7 @@ use Furdarius\OIDConnect\Contract\Authenticator;
 use Furdarius\OIDConnect\Contract\JSONGetter;
 use Furdarius\OIDConnect\Contract\JSONPoster;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider as ServiceProviderIlluminate;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
@@ -28,10 +29,13 @@ class ServiceProvider extends ServiceProviderIlluminate
      * Bootstrap any application services.
      *
      * @return void
+     * @throws BindingResolutionException
      */
     public function boot()
     {
-        $this->publishes([realpath(__DIR__ . '/../config/opidconnect.php') => config_path('opidconnect.php')]);
+        $this->publishes([realpath(__DIR__ . '/../config/opidconnect.php')
+        => config_path('opidconnect.php')]);
+
         $this->loadMigrationsFrom(realpath(__DIR__ . '/../migrations'));
         $this->loadRoutesFrom(realpath(__DIR__ . '/Http/routes.php'));
 

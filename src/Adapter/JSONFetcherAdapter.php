@@ -5,18 +5,19 @@ namespace Furdarius\OIDConnect\Adapter;
 use Furdarius\OIDConnect\Contract\JSONGetter;
 use Furdarius\OIDConnect\Contract\JSONPoster;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class JSONFetcherAdapter implements JSONGetter, JSONPoster
 {
     /**
-     * @var \GuzzleHttp\Client
+     * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * JSONFetcherAdapter constructor.
      *
-     * @param \GuzzleHttp\Client $client
+     * @param Client $client
      */
     public function __construct(Client $client)
     {
@@ -25,6 +26,7 @@ class JSONFetcherAdapter implements JSONGetter, JSONPoster
 
     /**
      * {@inheritdoc}
+     * @throws GuzzleException
      */
     public function get(string $url, array $params = [], array $options = []): array
     {
@@ -41,9 +43,10 @@ class JSONFetcherAdapter implements JSONGetter, JSONPoster
     /**
      * @param string $method
      * @param string $url
-     * @param array  $options
+     * @param array $options
      *
      * @return array
+     * @throws GuzzleException
      */
     protected function request(string $method, string $url, array $options): array
     {
@@ -58,6 +61,7 @@ class JSONFetcherAdapter implements JSONGetter, JSONPoster
 
     /**
      * {@inheritdoc}
+     * @throws GuzzleException
      */
     public function post(string $url, array $params = [], $body = null, array $options = []): array
     {

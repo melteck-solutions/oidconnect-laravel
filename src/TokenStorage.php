@@ -9,11 +9,11 @@ class TokenStorage
     /**
      * @var QueryBuilder
      */
-    private $query;
+    private QueryBuilder $query;
 
     /**
      * TokenStorage constructor.
-     * @param  \Illuminate\Database\Query\Builder $query
+     * @param QueryBuilder $query
      */
     public function __construct(QueryBuilder $query)
     {
@@ -50,7 +50,6 @@ class TokenStorage
      */
     public function fetchRefresh(string $sub, string $iss): ?string
     {
-        /* @var \Illuminate\Support\Collection $list */
         $list = $this->query->getConnection()
             ->table("tokens")
             ->select(['refresh_token'])

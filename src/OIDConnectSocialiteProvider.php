@@ -5,11 +5,14 @@ namespace Furdarius\OIDConnect;
 use Furdarius\OIDConnect\Exception\TokenRequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\ProviderInterface;
 use Laravel\Socialite\Two\User;
 use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\Token\Plain;
 
 class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderInterface
 {
@@ -35,29 +38,30 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * JWT Token parser instance.
      *
-     * @var \Lcobucci\JWT\Parser
+     * @var Parser
      */
-    protected $parser;
+    protected Parser $parser;
     /**
      * @var string
      */
-    private $authUrl;
+    private string $authUrl;
     /**
      * @var string
      */
-    private $tokenUrl;
+    private string $tokenUrl;
 
     /**
      * Create a new provider instance.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Lcobucci\JWT\Parser     $parser
+     * @param Request $request
+     * @param Parser $parser
      * @param  string                   $clientId
      * @param  string                   $clientSecret
      * @param  string                   $redirectUrl
      * @param  string                   $authUrl
      * @param  string                   $tokenUrl
      */
+    #[Pure]
     public function __construct(
         Request $request,
         Parser $parser,
@@ -77,7 +81,7 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    public function user()
+    public function user(): User|\Laravel\Socialite\Contracts\User|null
     {
         if ($this->hasInvalidState()) {
             throw new InvalidStateException;
@@ -101,7 +105,7 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    protected function mapUserToObject(array $user)
+    protected function mapUserToObject(array $user): User
     {
         return (new User)->setRaw($user)->map([
             'id' => $user['sub'],
@@ -116,13 +120,14 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    protected function getUserByToken($token)
+    #[ArrayShape(['sub' => "mixed|null", 'iss' => "mixed|null", 'name' => "mixed|null", 'email' => "mixed|null"])]
+    protected function getUserByToken($token): array
     {
         /**
          * We cant get claims from Token interface, so call claims method implicitly
          * link: https://github.com/lcobucci/jwt/pull/186
          *
-         * @var $plainToken \Lcobucci\JWT\Token\Plain
+         * @var $plainToken Plain
          */
         $plainToken = $this->parser->parse($token);
 
@@ -139,7 +144,8 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    protected function getTokenFields($code)
+    #[ArrayShape(['client_id' => "string", 'client_secret' => "string", 'code' => "string", 'redirect_uri' => "string", 'grant_type' => "string"])]
+    protected function getTokenFields($code): array
     {
         return [
             'client_id' => $this->clientId,
@@ -153,7 +159,7 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase($this->authUrl, $state);
     }
@@ -161,7 +167,7 @@ class OIDConnectSocialiteProvider extends AbstractProvider implements ProviderIn
     /**
      * {@inheritdoc}
      */
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return $this->tokenUrl;
     }

@@ -14,7 +14,7 @@ class RequestTokenParser
     /**
      * @var Parser
      */
-    private $parser;
+    private Parser $parser;
 
     /**
      * TokenMiddleware constructor.
@@ -23,7 +23,8 @@ class RequestTokenParser
      */
     public function __construct(
         Parser $parser
-    ) {
+    )
+    {
         $this->parser = $parser;
     }
 
