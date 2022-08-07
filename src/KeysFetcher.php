@@ -7,25 +7,27 @@ use Furdarius\OIDConnect\Contract\JSONGetter;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Lcobucci\Jose\Parsing\Decoder;
 use Lcobucci\JWT\Signer\Key;
+use Psr\SimpleCache\InvalidArgumentException;
+
 
 class KeysFetcher
 {
     /**
      * @var JSONGetter
      */
-    private $fetcher;
+    private JSONGetter $fetcher;
     /**
      * @var string
      */
-    private $jwksURI;
+    private string $jwksURI;
     /**
      * @var Decoder
      */
-    private $decoder;
+    private Decoder $decoder;
     /**
      * @var CacheRepository
      */
-    private $cache;
+    private CacheRepository $cache;
 
     /**
      * KeysFetcher constructor.
@@ -49,6 +51,7 @@ class KeysFetcher
      * @param string $kid
      *
      * @return Key|null
+     * @throws InvalidArgumentException
      */
     public function getByKID(string $kid): ?Key
     {
@@ -81,7 +84,8 @@ class KeysFetcher
 
         $data = $this->fetcher->get($this->jwksURI);
         foreach ($data['keys'] as $key) {
-            $result[$key['kid']] = new Key($this->createPemFromModulusAndExponent($key['n'], $key['e']));
+            $keyMap = $this->createPemFromModulusAndExponent($key['n'], $key['e']);
+            $result[$key['kid']] ="";// new Key($keyMap);
         }
 
         return $result;

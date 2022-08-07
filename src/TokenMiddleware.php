@@ -12,6 +12,7 @@ use Lcobucci\JWT\Token\Plain;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\ValidAt;
 use Lcobucci\JWT\Validator;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class TokenMiddleware
 {
@@ -80,7 +81,7 @@ class TokenMiddleware
      * @param Closure $next
      *
      * @return mixed
-     * @throws AuthenticationException
+     * @throws AuthenticationException|InvalidArgumentException
      */
     public function handle(Request $request, Closure $next): mixed
     {
